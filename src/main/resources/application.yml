@@ -1,0 +1,73 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Auth Service - Público
+        - id: auth-service
+          uri: http://auth-service:8084
+          predicates:
+            - Path=/auth/**, /oauth2/**, /.well-known/**
+
+        # Bike Registration - Mixto
+        - id: bike-registration
+          uri: http://bike-registration-app:8080
+          predicates:
+            - Path=/api/v1/bicycles/**, /api/v1/catalog/**
+
+        # Theft Report - Mixto
+        - id: theft-report
+          uri: http://theft-report-app:8083
+          predicates:
+            - Path=/api/v1/theft-reports/**, /api/v1/stolen-bikes/**, /api/v1/tips/**
+
+        # Media Service
+        - id: media-service
+          uri: http://media-service-app:8081
+          predicates:
+            - Path=/api/v1/media/**
+
+        # Location Service - Público
+        - id: location-service
+          uri: http://location-service-app:8082
+          predicates:
+            - Path=/api/v1/locations/**
+
+# JWT Configuration
+auth:
+  jwks:
+    url: http://auth-service:8084/.well-known/jwks.json
+  jwt:
+    issuer: auth-service
+    audience: bike-ecosystem
+
+# Rutas públicas (no requieren JWT)
+gateway:
+  public-paths: >
+    /auth/**,
+    /oauth2/**,
+    /.well-known/**,
+    /api/v1/catalog/**,
+    /api/v1/locations/**,
+    /api/v1/stolen-bikes/*/public,
+    /api/v1/stolen-bikes/*/pdf,
+    /api/v1/tips/**,
+    /actuator/health
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.bikefinder.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

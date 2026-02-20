@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bikefinder/api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      AUTH_JWKS_URL: http://auth-service:8084/.well-known/jwks.json
+      AUTH_JWT_ISSUER: auth-service
+      AUTH_JWT_AUDIENCE: bike-ecosystem
+    networks:
+      - bike-network
+    restart: unless-stopped
+
+networks:
+  bike-network:
+    external: true

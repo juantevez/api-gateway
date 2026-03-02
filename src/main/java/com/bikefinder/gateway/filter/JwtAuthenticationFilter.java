@@ -13,14 +13,17 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.net.URL;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -36,7 +39,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Value("${auth.jwt.audience}")
     private String expectedAudience;
 
-    @Value("#{'${gateway.public-paths}'.split(',')}")
+    @Value("${gateway.public-paths}")
+    private String publicPathsRaw;
+
+    // 1. Instanciar el Matcher de Spring
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     private List<String> publicPaths;
 
     private PublicKey publicKey;
@@ -44,6 +52,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @PostConstruct
     public void init() {
         loadPublicKey();
+
+        this.publicPaths = Arrays.stream(publicPathsRaw.split(","))
+                .map(String::trim)
+                .toList();
+        loadPublicKey();
+
     }
 
     private void loadPublicKey() {
@@ -61,6 +75,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+
+        // ← Dejar pasar siempre los preflight requests de CORS
+        if (exchange.getRequest().getMethod() == HttpMethod.OPTIONS) {
+            return chain.filter(exchange);
+        }
 
         // Rutas públicas no requieren autenticación
         if (isPublicPath(path)) {
@@ -117,14 +136,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
     }
 
+    // 3. Método simplificado y robusto
     private boolean isPublicPath(String path) {
-        return publicPaths.stream().anyMatch(publicPath -> {
-            if (publicPath.endsWith("/**")) {
-                String prefix = publicPath.substring(0, publicPath.length() - 3);
-                return path.startsWith(prefix);
-            }
-            return path.equals(publicPath) || path.startsWith(publicPath);
-        });
+        if (publicPaths == null) return false;
+
+        return publicPaths.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     @Override

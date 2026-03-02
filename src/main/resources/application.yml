@@ -6,36 +6,51 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
       routes:
-        # Auth Service - Público
+        # Auth Service
         - id: auth-service
           uri: http://auth-service:8084
           predicates:
             - Path=/auth/**, /oauth2/**, /.well-known/**
 
-        # Bike Registration - Mixto
+        # Media Service - MÁS ESPECÍFICO, VA PRIMERO
+        - id: media-service-photos
+          uri: http://media-service-app:8081
+          predicates:
+            - Path=/api/v1/bicycles/{bicycleId}/photos, /api/v1/bicycles/{bicycleId}/photos/**, /api/v1/photos/**
+
+        # Theft Report
+        - id: theft-report
+          uri: http://theft-report-app:8083
+          predicates:
+            - Path=/api/v1/theft-reports/**, /api/v1/stolen-bikes/**, /api/v1/tips/**,/api/v1/bicycles/*/report-theft
+
+        # Bike Registration - MÁS GENERAL, VA DESPUÉS
         - id: bike-registration
           uri: http://bike-registration-app:8080
           predicates:
             - Path=/api/v1/bicycles/**, /api/v1/catalog/**
 
-        # Theft Report - Mixto
-        - id: theft-report
-          uri: http://theft-report-app:8083
-          predicates:
-            - Path=/api/v1/theft-reports/**, /api/v1/stolen-bikes/**, /api/v1/tips/**
-
-        # Media Service
-        - id: media-service
-          uri: http://media-service-app:8081
-          predicates:
-            - Path=/api/v1/media/**
-
-        # Location Service - Público
+        # Location Service
         - id: location-service
           uri: http://location-service-app:8082
           predicates:
-            - Path=/api/v1/locations/**
+            - Path=/api/v1/locations/**, /api/v1/countries/**, /api/v1/level1/**, /api/v1/level2/**, /api/v1/localities/**
 
 # JWT Configuration
 auth:
@@ -45,18 +60,28 @@ auth:
     issuer: auth-service
     audience: bike-ecosystem
 
-# Rutas públicas (no requieren JWT)
+# Rutas publicas (no requieren JWT)
 gateway:
-  public-paths: >
-    /auth/**,
-    /oauth2/**,
-    /.well-known/**,
-    /api/v1/catalog/**,
-    /api/v1/locations/**,
-    /api/v1/stolen-bikes/*/public,
-    /api/v1/stolen-bikes/*/pdf,
-    /api/v1/tips/**,
-    /actuator/health
+  public-paths: ${GATEWAY_PUBLIC_PATHS:/auth/**,/oauth2/**,/.well-known/**}
+
+  # public-paths:
+  #   - /auth/**
+  #   - /oauth2/**
+  #   - /.well-known/**
+  #   - /api/v1/catalog/**
+  #   - /api/v1/locations/**
+  #   - /api/v1/countries/**
+  #   - /api/v1/level1/**
+  #   - /api/v1/level2/**
+  #   - /api/v1/localities/**
+  #   - /api/v1/stolen-bikes/*/public
+  #   - /api/v1/stolen-bikes/*/pdf
+  #   - /api/v1/theft-reports/*/pdf
+  #   - /api/v1/tips/**
+  #   - /api/v1/photos/*/view
+  #   - /api/v1/photos/*/download
+  #   - /actuator/health
+
 
 # Logging
 logging:

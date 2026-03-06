@@ -15,6 +15,7 @@ spring:
               - GET
               - POST
               - PUT
+              - PATCH
               - DELETE
               - OPTIONS
             allowedHeaders:
@@ -39,6 +40,12 @@ spring:
           uri: http://theft-report-app:8083
           predicates:
             - Path=/api/v1/theft-reports/**, /api/v1/stolen-bikes/**, /api/v1/tips/**,/api/v1/bicycles/*/report-theft
+
+        # Image Bike Recognition Service
+        - id: image-bike-recognition
+          uri: http://image-bike-recognition-app:8085
+          predicates:
+            - Path=/api/v1/recognition/**
 
         # Bike Registration - MÁS GENERAL, VA DESPUÉS
         - id: bike-registration

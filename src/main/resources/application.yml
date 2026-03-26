@@ -2,6 +2,12 @@ server:
   port: 8000
 
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
   application:
     name: api-gateway
   cloud:
@@ -28,6 +34,12 @@ spring:
           uri: http://auth-service:8084
           predicates:
             - Path=/auth/**, /oauth2/**, /.well-known/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
 
         # Media Service - MÁS ESPECÍFICO, VA PRIMERO
         - id: media-service-photos
@@ -40,24 +52,36 @@ spring:
           uri: http://theft-report-app:8083
           predicates:
             - Path=/api/v1/theft-reports/**, /api/v1/stolen-bikes/**, /api/v1/tips/**,/api/v1/bicycles/*/report-theft
-
-        # Image Bike Recognition Service
-        - id: image-bike-recognition
-          uri: http://image-bike-recognition-app:8085
-          predicates:
-            - Path=/api/v1/recognition/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
 
         # Bike Registration - MÁS GENERAL, VA DESPUÉS
         - id: bike-registration
           uri: http://bike-registration-app:8080
           predicates:
             - Path=/api/v1/bicycles/**, /api/v1/catalog/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
 
         # Location Service
         - id: location-service
           uri: http://location-service-app:8082
           predicates:
             - Path=/api/v1/locations/**, /api/v1/countries/**, /api/v1/level1/**, /api/v1/level2/**, /api/v1/localities/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
 
 # JWT Configuration
 auth:

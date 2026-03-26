@@ -58,6 +58,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .toList();
         loadPublicKey();
 
+        // TEMPORAL - borrar después
+        log.info(">>> PUBLIC PATHS CARGADOS: {}", publicPaths);
+
+        loadPublicKey(); // ← además tenés loadPublicKey() duplicado, llamala solo una vez
     }
 
     private void loadPublicKey() {
@@ -140,8 +144,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private boolean isPublicPath(String path) {
         if (publicPaths == null) return false;
 
-        return publicPaths.stream()
+        boolean isPublic = publicPaths.stream()
                 .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        log.debug(">>> PATH: {} - isPublic: {}", path, isPublic); // TEMPORAL
+
+        return isPublic;
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -15,6 +16,7 @@ public class RateLimitConfig {
      * Este resolver se usa en rutas protegidas.
      */
     @Bean
+    @Primary
     public KeyResolver userKeyResolver() {
         return exchange -> {
             String userId = exchange.getRequest()
@@ -50,17 +52,18 @@ public class RateLimitConfig {
      * 20 req/seg, burst de 40.
      */
     @Bean
+    @Primary
     public RedisRateLimiter defaultRateLimiter() {
-        return new RedisRateLimiter(20, 40, 1);
+        return new RedisRateLimiter(5, 10, 1);
     }
 
     /**
      * Rate limiter estricto para /auth/**.
      * Previene brute force en login.
-     * 5 req/seg, burst de 10.
+     * 2 req/seg, burst de 5.
      */
     @Bean
     public RedisRateLimiter authRateLimiter() {
-        return new RedisRateLimiter(5, 10, 1);
+        return new RedisRateLimiter(2, 5, 1);
     }
 }

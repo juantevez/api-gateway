@@ -4,9 +4,11 @@ server:
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      #host: ${REDIS_HOST:redis}
+      host: localhost
+      #port: ${REDIS_PORT:6379}
+      port: 6379
+      password: ""
 
   application:
     name: api-gateway
@@ -31,7 +33,7 @@ spring:
       routes:
         # Auth Service
         - id: auth-service
-          uri: http://auth-service:8084
+          uri: http://localhost:8084
           predicates:
             - Path=/auth/**, /oauth2/**, /.well-known/**
           filters:

@@ -10,11 +10,21 @@ services:
     ports:
       - "8000:8000"
     environment:
+      JAVA_TOOL_OPTIONS: >-
+        -Xmx256m -Xms128m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m
+        -XX:+HeapDumpOnOutOfMemoryError
+        -XX:HeapDumpPath=/tmp/heapdump-gateway.hprof
       AUTH_JWKS_URL: http://auth-service:8084/.well-known/jwks.json
       AUTH_JWT_ISSUER: auth-service
       AUTH_JWT_AUDIENCE: bike-ecosystem
       TZ: America/Argentina/Buenos_Aires
       GATEWAY_PUBLIC_PATHS: /auth/**,/oauth2/**,/.well-known/**,/api/v1/catalog/**,/api/v1/locations/**,/api/v1/countries/**,/api/v1/level1/**,/api/v1/level2/**,/api/v1/localities/**,/api/v1/stolen-bikes/*/public,/api/v1/stolen-bikes/*/pdf,/api/v1/theft-reports/*/pdf,/api/v1/tips/**,/api/v1/photos/*/view,/api/v1/photos/*/download,/actuator/health
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 128m
     networks:
       - bike-network
     restart: unless-stopped
@@ -24,8 +34,20 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+        reservations:
+          memory: 32m
     networks:
       - bike-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 networks:
   bike-network:

@@ -51,6 +51,16 @@ spring:
                 rate-limiter: "#{@authRateLimiter}"
                 key-resolver: "#{@ipKeyResolver}"
                 deny-empty-key: false
+        - id: s3-storage-service
+          uri: http://s3-storage-app:8086
+          predicates:
+            - Path=/api/files/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
         - id: bike-registration
           uri: http://bike-registration-app:8080
           predicates:

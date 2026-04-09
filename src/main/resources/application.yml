@@ -81,6 +81,16 @@ spring:
                 rate-limiter: "#{@authRateLimiter}"
                 key-resolver: "#{@ipKeyResolver}"
                 deny-empty-key: false
+        - id: imagesearch
+          uri: http://imagesearch:8088
+          predicates:
+            - Path=/api/v1/image-search/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
 auth:
   jwks:
     url: http://auth-service:8084/.well-known/jwks.json

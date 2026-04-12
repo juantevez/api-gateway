@@ -91,6 +91,7 @@ spring:
                 rate-limiter: "#{@authRateLimiter}"
                 key-resolver: "#{@ipKeyResolver}"
                 deny-empty-key: false
+
 auth:
   jwks:
     url: http://auth-service:8084/.well-known/jwks.json
@@ -98,7 +99,7 @@ auth:
     issuer: auth-service
     audience: bike-ecosystem
 gateway:
-  public-paths: ${GATEWAY_PUBLIC_PATHS:/auth/**,/oauth2/**,/.well-known/**}
+  public-paths: ${GATEWAY_PUBLIC_PATHS:/auth/**,/oauth2/**,/.well-known/**,/api/v1/tips/**,/api/v1/stolen-bikes/**}
 logging:
   level:
     root: INFO

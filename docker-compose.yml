@@ -18,7 +18,7 @@ services:
       AUTH_JWT_ISSUER: auth-service
       AUTH_JWT_AUDIENCE: bike-ecosystem
       TZ: America/Argentina/Buenos_Aires
-      GATEWAY_PUBLIC_PATHS: /auth/**,/oauth2/**,/.well-known/**,/api/v1/catalog/**,/api/v1/locations/**,/api/v1/countries/**,/api/v1/level1/**,/api/v1/level2/**,/api/v1/localities/**,/api/v1/stolen-bikes/*/public,/api/v1/stolen-bikes/*/pdf,/api/v1/tips/**,/api/v1/photos/*/view,/api/v1/photos/*/download,/actuator/health,/api/v1/image-search/*/public
+      GATEWAY_PUBLIC_PATHS: /auth/**,/oauth2/**,/.well-known/**,/api/v1/catalog/**,/api/v1/locations/**,/api/v1/countries/**,/api/v1/level1/**,/api/v1/level2/**,/api/v1/localities/**,/api/v1/stolen-bikes/**,/api/v1/tips/**,/api/v1/photos/*/view,/api/v1/photos/*/download,/actuator/health,/api/v1/image-search/*/public
     deploy:
       resources:
         limits:

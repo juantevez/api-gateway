@@ -99,7 +99,7 @@ auth:
     issuer: auth-service
     audience: bike-ecosystem
 gateway:
-  public-paths: ${GATEWAY_PUBLIC_PATHS:/auth/**,/oauth2/**,/.well-known/**,/api/v1/tips/**,/api/v1/stolen-bikes/**}
+  public-paths: ${GATEWAY_PUBLIC_PATHS:/auth/**,/oauth2/**,/.well-known/**,/api/v1/catalog/**,/api/v1/locations/**,/api/v1/countries/**,/api/v1/level1/**,/api/v1/level2/**,/api/v1/localities/**,/api/v1/stolen-bikes/**,/api/v1/tips/**,/api/v1/photos/*/view,/api/v1/photos/*/download,/actuator/health,/api/v1/image-search/*/public}
 logging:
   level:
     root: INFO
